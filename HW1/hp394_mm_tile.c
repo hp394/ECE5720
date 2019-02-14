@@ -1,13 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <time.h>
+
+#define BILLION 1000000000L
 int** generateMatrix(int N, int random) {
 	int** A = malloc(sizeof(int*) * N);
 	for (int i = 0; i < N; i++) {
 		A[i] = malloc(sizeof(int) * N);
 		for (int j = 0; j < N; j++) {
 			if (random == 1)
-				A[i][j] = rand() % 1000;
+				A[i][j] = drand48() * 100;
 			else
 				A[i][j] = 0;
 		}
@@ -23,14 +26,34 @@ void print_matrix(int** A, int N) {
 		printf("\n");
 	}
 }
-int main() {
+int main(int argc, char* argv[]) {
 	int N = 6;
 	int tile = 2;
-	srand(time(NULL));
+	if(argc > 2) {
+		N = atoi(argv[1]);
+		tile = atoi(argv[2]);
+		if(tile == 0 && N != 0) {
+			printf("the tile size cannot be zero! \n");
+			return -1;
+		}
+		if(N % tile != 0) {
+			printf("the dimension and the tile size are not matched! \n");
+			return -1;
+		} 
+	} else if(argc == 2) {
+			printf("missing parameters! \n");
+			return -1;
+	}
+	srand48(1);
+	
+	uint64_t diff;
+	struct timespec start, end;
 	int** A = generateMatrix(N, 1);
 	int** B = generateMatrix(N, 1);
 	int** C = generateMatrix(N, 0);
-	int** res = generateMatrix(N, 0);
+//	int** res = generateMatrix(N, 0);
+	
+	clock_gettime(CLOCK_MONOTONIC, &start);
 	for (int i = 0; i < N; i += tile) {
 		for (int j = 0; j < N; j += tile) {
 			for (int k = 0; k < N; k += tile) {
@@ -42,16 +65,13 @@ int main() {
 
 		}
 	}
-	for (int i = 0; i < N; i++)
-		for (int j = 0; j < N; j++)
-			for (int k = 0; k < N; k++)
-				res[i][j] += A[i][k] * B[k][j];
-	print_matrix(C, N);
-	printf("\n");
-	print_matrix(res, N);
+	
+	clock_gettime(CLOCK_MONOTONIC, &end);
+	diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
+	printf("elapsed time of tile is %llu ns\n", (long long unsigned int)diff);
 
 
 
-	//printf("hello,world!");
+
 	return 0;
 }
