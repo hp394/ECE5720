@@ -93,19 +93,18 @@ int main(int argc, char* argv[]) {
 	}
 	clock_gettime(CLOCK_MONOTONIC, &end);
 	diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-	printf("elapsed time of pthread is %llu ns\n", (long long unsigned int)diff);
-	/*
-	print_matrix(C, N);
-	for (int i = 0; i < N; i++)
-		for (int j = 0; j < N; j++)
-			for (int k = 0; k < N; k++)
-				res[i][j] += A[i][k] * B[k][j];
-	printf("\n");
-	print_matrix(res, N);
-	*/
+//	printf("elapsed time of pthread is %llu ns\n", (long long unsigned int)diff);
+
 	free(thread);
 	free(A);
 	free(B);
 	free(C);
+  
+  FILE *fp;
+  fp = fopen("pt-elapsed-time.csv", "a+");
+
+  fprintf(fp, "%d,%d,%llu\n", N, thread_count, diff);
+
+  fclose( fp );
 	return 0;
 }

@@ -26,6 +26,7 @@ void print_matrix(int** A, int N) {
 		printf("\n");
 	}
 }
+
 int main(int argc, char* argv[]) {
 	int N = 5;
 	srand48(1);
@@ -52,9 +53,14 @@ int main(int argc, char* argv[]) {
 	clock_gettime(CLOCK_MONOTONIC, &end);
 	//print_matrix(C, N);
 	diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-	printf("elapsed time of rbyc is %llu ns\n", (long long unsigned int)diff);
+//	printf("elapsed time of rbyc is %llu ns\n", (long long unsigned int)diff);
 
+  
+  FILE *fp;
+  fp = fopen("rbyc-elapsed-time.csv", "a+");
 
-	//printf("hello,world!");
+  fprintf(fp, "%d,%llu\n", N, diff);
+
+  fclose( fp );
 	return 0;
 }

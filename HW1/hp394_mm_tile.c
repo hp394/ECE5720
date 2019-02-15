@@ -68,10 +68,15 @@ int main(int argc, char* argv[]) {
 	
 	clock_gettime(CLOCK_MONOTONIC, &end);
 	diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-	printf("elapsed time of tile is %llu ns\n", (long long unsigned int)diff);
+//	printf("elapsed time of tile is %llu ns\n", (long long unsigned int)diff);
+  
 
+  FILE *fp;
+  fp = fopen("tile-elapsed-time.csv", "a+");
 
+  fprintf(fp, "%d,%d,%llu\n", N, tile, diff);
 
+  fclose( fp );
 
 	return 0;
 }
