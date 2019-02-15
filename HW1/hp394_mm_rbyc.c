@@ -18,16 +18,14 @@
 /**
  * generate Matiric according to the dimension
  */
-int** generateMatrix(int N, int random) {
-	int** A = malloc(sizeof(int*) * N);
-	for (int i = 0; i < N; i++) {
-		A[i] = malloc(sizeof(int) * N);
-		for (int j = 0; j < N; j++) {
-			if(random == 1)
-				A[i][j] = drand48() * 100;
+int* generateMatrix(int N, int random) {
+	int* A = malloc(sizeof(int) * N * N);
+	for (int i = 0; i < N * N; i++) {
+			if (random == 1)
+				A[i] = drand48() * 100;
 			else
-				A[i][j] = 0;
-		}
+				A[i] = 0;
+		
 	}
 	return A;
 }
@@ -35,10 +33,10 @@ int** generateMatrix(int N, int random) {
 /**
  * print the Matrix used for test
  */
-void print_matrix(int** A, int N) {
+void print_matrix(int* A, int N) {
 	for (int i = 0; i < N; i++) {
 		for (int j = 0; j < N; j++) {
-			printf("%d ", A[i][j]);
+			printf("%d ", A[i * N + j]);
 		}
 		printf("\n");
 	}
@@ -55,20 +53,17 @@ int main(int argc, char* argv[]) {
 	uint64_t diff;
 	struct timespec start, end;
   //initialize the matrix
-	int** A = generateMatrix(N, 1);
-	int** B = generateMatrix(N, 1);
-	int** C = generateMatrix(N, 0);
+	int* A = generateMatrix(N, 1);
+	int* B = generateMatrix(N, 1);
+	int* C = generateMatrix(N, 0);
 	
 	clock_gettime(CLOCK_MONOTONIC, &start);
   //calculate the multiply result of two matrix row by column
 	for (int i = 0; i < N; i++) {
-		int* temp_A = A[i];
 		for (int j = 0; j < N; j++) {
-			int temp_C = C[i][j];
 			for (int k = 0; k < N; k++) {
-				temp_C += temp_A[k] * B[k][j];
+				C[i * N + j] += A[i * N + k] * B[k * N + j];
 			}
-			C[i][j] = temp_C;
 		}
 	}
 	clock_gettime(CLOCK_MONOTONIC, &end);

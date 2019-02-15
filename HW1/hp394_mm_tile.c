@@ -20,16 +20,14 @@
 /**
  * generate Matiric according to the dimension
  */
-int** generateMatrix(int N, int random) {
-	int** A = malloc(sizeof(int*) * N);
-	for (int i = 0; i < N; i++) {
-		A[i] = malloc(sizeof(int) * N);
-		for (int j = 0; j < N; j++) {
+int* generateMatrix(int N, int random) {
+	int* A = malloc(sizeof(int) * N * N);
+	for (int i = 0; i < N * N; i++) {
 			if (random == 1)
-				A[i][j] = drand48() * 100;
+				A[i] = drand48() * 100;
 			else
-				A[i][j] = 0;
-		}
+				A[i] = 0;
+		
 	}
 	return A;
 }
@@ -37,10 +35,10 @@ int** generateMatrix(int N, int random) {
 /**
  * print the Matrix used for test
  */
-void print_matrix(int** A, int N) {
+void print_matrix(int* A, int N) {
 	for (int i = 0; i < N; i++) {
 		for (int j = 0; j < N; j++) {
-			printf("%d ", A[i][j]);
+			printf("%d ", A[i * N + j]);
 		}
 		printf("\n");
 	}
@@ -70,9 +68,9 @@ int main(int argc, char* argv[]) {
 	uint64_t diff;
 	struct timespec start, end;
   //initialize the Matrix
-	int** A = generateMatrix(N, 1);
-	int** B = generateMatrix(N, 1);
-	int** C = generateMatrix(N, 0);
+	int* A = generateMatrix(N, 1);
+	int* B = generateMatrix(N, 1);
+	int* C = generateMatrix(N, 0);
 	
 	clock_gettime(CLOCK_MONOTONIC, &start);
   //traverse all the tiles
@@ -83,7 +81,7 @@ int main(int argc, char* argv[]) {
 				for (int i1 = i; i1 < i + tile; i1++)
 					for (int j1 = j; j1 < j + tile; j1++)
 						for (int k1 = k; k1 < k + tile; k1++)
-							C[i1][j1] += A[i1][k1] * B[k1][j1];
+							C[i1 * N +j1] += A[i1 * N + k1] * B[k1 * N + j1];
 			}
 
 		}
