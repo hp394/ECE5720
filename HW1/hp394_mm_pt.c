@@ -1,3 +1,15 @@
+/*****************************************************
+ * this file can be compiled by using
+ * gcc -o hp394_mm_pt hp394_mm_pt.c -lrt -pthread
+ * then you can execute it by using
+ * ./hp394_mm_pt a b
+ * a is the dimension of the matrix and b is the thread number
+ * if you don't provide a and b, the program will apply the default value
+ * if you provide more than 2 value, only the first two will be used
+ * if you only provide one value, there would be an error
+ * I highly recommond to use the ./benchmark and it will compiled all the files
+ * and writing the information into the corresponding csv file.
+ *****************************************************/
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,13 +17,16 @@
 #include <time.h>
 
 #define BILLION 1000000000L
-//#pragma comment(lib, "pthreadVC2.lib")
+
 int** A;
 int** B;
 int** C;
-//int** res;
 int thread_size;
 int N;
+
+/**
+ * matrix multiply inside one thread
+ */
 void *thread_mul_matrix(void* tid) {
 	int id = (int)tid;
 	int start_row = id * thread_size;
@@ -26,25 +41,32 @@ void *thread_mul_matrix(void* tid) {
 
 	pthread_exit(NULL);
 }
+
+/**
+ * initialize the matrix
+ */
 void init(int N) {
 	srand48(1);
 	A = malloc(sizeof(int*) * N);
 	B = malloc(sizeof(int*) * N);
 	C = malloc(sizeof(int*) * N);
-//	res = malloc(sizeof(int*) * N);
+
 	for (int i = 0; i < N; i++) {
 		A[i] = malloc(sizeof(int) * N);
 		B[i] = malloc(sizeof(int) * N);
 		C[i] = malloc(sizeof(int) * N);
-		//res[i] = malloc(sizeof(int) * N);
+
 		for (int j = 0; j < N; j++) {
 				A[i][j] = drand48() * 100;
 				B[i][j] = drand48() * 100;
 				C[i][j] = 0;
-		//		res[i][j] = 0;
 		}
 	}
 }
+
+/**
+ * print the matrix for test
+ */
 void print_matrix(int** A, int N) {
 	for (int i = 0; i < N; i++) {
 		for (int j = 0; j < N; j++) {
@@ -54,8 +76,10 @@ void print_matrix(int** A, int N) {
 	}
 }
 int main(int argc, char* argv[]) {
+  //set the default value of the matrix dimension and thread number
 	int thread_count = 2;
 	N = 5;
+  //get the value of the matrix dimension and thread number from commond line
 	if(argc > 2) {
 		N = atoi(argv[1]);
 		thread_count = atoi(argv[2]);
@@ -70,6 +94,7 @@ int main(int argc, char* argv[]) {
 			return -1;
 	}
 
+  //initialize the thread and the matrix
 	pthread_t* thread = malloc(thread_count * sizeof(pthread_t));
 	thread_size = N / thread_count;
 	int left_size = N % thread_count;
@@ -78,9 +103,12 @@ int main(int argc, char* argv[]) {
 	init(N);
 	
 	clock_gettime(CLOCK_MONOTONIC, &start);
+  
+  //start the thread
 	for (int i = 0; i < thread_count; i++) {
 		pthread_create(&thread[i], NULL,thread_mul_matrix, (void *)i);
 	}
+  //calculate multiply the left part of the matrix
 	for (int i = N - left_size; i < N; i++) {
 		for (int j = 0; j < N; j++) {
 			for (int k = 0; k < N; k++)
@@ -88,18 +116,22 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+  //wait until all the thread are finished
 	for (int i = 0; i < thread_count; i++) {
 		pthread_join(thread[i], NULL);
 	}
 	clock_gettime(CLOCK_MONOTONIC, &end);
+  
+  //calculate the elapsed time
 	diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-//	printf("elapsed time of pthread is %llu ns\n", (long long unsigned int)diff);
+
 
 	free(thread);
 	free(A);
 	free(B);
 	free(C);
   
+  //write the dimension size, thread number and elapsed time into a file
   FILE *fp;
   fp = fopen("pt-elapsed-time.csv", "a+");
 
